@@ -18,18 +18,20 @@ class DashUtilities:
     
     
     
-    
+    @staticmethod
+    def verticalMarksStyle():
+        return {'writing-mode': 'vertical-lr', 'text-orientation': 'sideways'}
     
     
     @staticmethod
-    def generateMarks(input):
+    def generateMarks(input, style={}):
         ret = {}
         if isinstance(input, list):
             for x in input:
-                ret[x] = {'label': str(x)}
+                ret[x] = {'label': str(x),'style': style}
         elif isinstance(input, dict):
             for key, value in input.items():
-                ret[key] = {'label': str(value)}
+                ret[key] = {'label': str(value),'style': style}
         return ret
     
     @staticmethod
