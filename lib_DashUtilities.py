@@ -14,71 +14,77 @@ class DashUtilities:
         return DashUtilities.__instance__
     
     
-    
-    
-    
-    
     @staticmethod
     def verticalMarksStyle():
         return {'writing-mode': 'vertical-lr', 'text-orientation': 'sideways'}
     
     
     @staticmethod
-    def generateMarks(input, style={}):
+    def generateMarks(input, globalStyle = {}, style={}):
         ret = {}
         if isinstance(input, list):
             for x in input:
-                ret[x] = {'label': str(x),'style': style}
+                ret[x] = {'label': str(x),'style': globalStyle}
         elif isinstance(input, dict):
             for key, value in input.items():
-                ret[key] = {'label': str(value),'style': style}
+                ret[key] = {'label': str(value),'style': globalStyle}
+        for k,v in style.items():
+            if k in ret:
+                ret[k]['style'] = v
         return ret
     
     @staticmethod
-    def generateDropdownList(input = None, all=None,none=None):
+    def generateList(input = None, head = None, tail = None, empty=None, extraIfEmpty = False, disabled = None):
         ret=[]
-        if(input is None or (input is not None and len(input)<=0)):
-            ret.append({'label': 'Empty', 'value': ''})
-            return ret
-        if(none is not None):
-            ret.append({'label': 'None', 'value': none})
-        elif(all is not None):
-            ret.append({'label': 'All', 'value': all})
+        inputIsEmpty = DashUtilities.isEmpty(input)
+        if(inputIsEmpty):
+            if(extraIfEmpty):
+                ret = ret + DashUtilities.processIterable(head)
+            ret = ret + DashUtilities.processIterable(empty)
+            if(extraIfEmpty):
+                ret = ret + DashUtilities.processIterable(tail)
+        else:
+            ret = ret + DashUtilities.processIterable(head)
+            ret = ret + DashUtilities.processIterable(input)
+            ret = ret + DashUtilities.processIterable(tail)
+        finalRet = []
+        if(not DashUtilities.isEmpty(disabled)):
+            if(isinstance(disabled, dict)):
+                disabled = list(disabled.keys())
+            if(isinstance(disabled, list)):
+                for r in ret:
+                    if r['value'] in disabled:
+                        finalRet.append(r | {'disabled':True})
+                    else:
+                        finalRet.append(r)
+            else:
+                finalRet = ret
+        else:
+            finalRet = ret
+        return finalRet
+    @staticmethod
+    def isEmpty(input):
+        try:
+            return input is None or (input is not None and len(input)<=0)
+        except TypeError as e:
+            return False
+    @staticmethod
+    def processIterable(input = None):
+        ret = []
         if(isinstance(input, list)):
             for v in input:
                 ret.append({'label': v, 'value': v})
         elif(isinstance(input, dict)):
             for key, value in input.items():
-                ret.append({'label': key, 'value': value})
+                ret.append({'label': value, 'value': key})
+        elif(isinstance(input, pd.core.series.Series)):
+            return DashUtilities.processIterable(input.to_dict())
         return ret
-    @staticmethod
-    def generateData(x = [],y = [], type = 'line', name = ''):
-        ret = []
-        if isinstance(y, pd.DataFrame) and len(y.columns)>1:
-            for column in y:
-                ret.append(DashUtilities.__generateRawData__(x,y[column],type[column] if isinstance(type, dict) else type,name[column] if isinstance(name, dict) else column))
-        else:
-            ret.append(DashUtilities.__generateRawData__(x,y,type,name))
-        return ret
-    @staticmethod
-    def __generateRawData__(x=[],y=[],type='line',name=''):
-        return {'x': x, 'y': y, 'type': type, 'name': name}
-    @staticmethod
-    def generateSingleData(x=[],y=[],type='line',name=''):
-        return __generateRawData__(x,y,type,name)
-    @staticmethod
-    def generateFigure(data = [], title = "", layout = None):
-        if(layout is None):
-            layout = {
-                'title': title
-            }
-        return {
-            'data':data,
-            'layout': layout
-        }
+    
+    ### Generator methods removed. Use plotly express instead.
     @staticmethod
     def emptyFigure():
-        return DashUtilities.generateFigure(layout = {})
+        return {'data': [], 'layout': {}}
     @staticmethod
     def placeholderFigure():
-        return DashUtilities.generateFigure(data = DashUtilities.generateData([2,3,4,5,6],[3,6,6,7,9]))
+        return {'data': [{'x': [2, 3, 4, 5, 6], 'y': [3, 6, 6, 7, 9], 'type': 'line', 'name': ''}], 'layout': {'title': ''}}
