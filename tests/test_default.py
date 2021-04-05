@@ -119,4 +119,22 @@ emptyCombos = [
 @pytest.mark.parametrize('a,b',emptyCombos)
 def test_isEmpty(a,b):
     assert du.isEmpty(a)==b
+       
+marksCombos = [
+    ([],{},{},{}),
+    ({},{},{},{}),
+    (['a','x'],{},{},{'a':{'label': 'a','style': {}},'x':{'label': 'x','style': {}}}),
+    (['a','x'],{'c':'d'},{},{'a':{'label': 'a','style': {'c':'d'}},'x':{'label': 'x','style': {'c':'d'}}}),
+    ({'a':'b','x':'y'},{},{},{'a':{'label': 'b','style': {}},'x':{'label': 'y','style': {}}}),
+    ({'a':'b','x':'y'},{'c':'d'},{},{'a':{'label': 'b','style': {'c':'d'}},'x':{'label': 'y','style': {'c':'d'}}}),
+    (['a','x'],{},{'x':{'p':'q'}},{'a':{'label': 'a','style': {}},'x':{'label': 'x','style': {'p':'q'}}}),
+    (['a','x'],{'c':'d'},{'x':{'p':'q'}},{'a':{'label': 'a','style': {'c':'d'}},'x':{'label': 'x','style': {'p':'q'}}}),
+    ({'a':'b','x':'y'},{},{'x':{'p':'q'}},{'a':{'label': 'b','style': {}},'x':{'label': 'y','style': {'p':'q'}}}),
+    ({'a':'b','x':'y'},{'c':'d'},{'x':{'p':'q'}},{'a':{'label': 'b','style': {'c':'d'}},'x':{'label': 'y','style': {'p':'q'}}}),
+    ({'a':'b','x':'y'},{},{'j':{'p':'q'}},{'a':{'label': 'b','style': {}},'x':{'label': 'y','style': {}}}),
+    ({'a':'b','x':'y'},{'c':'d'},{'j':{'p':'q'}},{'a':{'label': 'b','style': {'c':'d'}},'x':{'label': 'y','style': {'c':'d'}}}),
+]
+@pytest.mark.parametrize('a,b,c,d',marksCombos)
+def test_marks(a,b,c,d):
+    assert du.generateMarks(a,b,c)==d
     
